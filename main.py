@@ -300,6 +300,21 @@ with tab_chart:
     st.plotly_chart(scatter_fig, use_container_width=True)
     st.caption("많이 도는 위성일수록 낮은 곳에 있습니다. 두 값이 같은 계산식으로 이어져 있어 점들이 하나의 곡선 위에 놓입니다.")
 
+    st.subheader("고도가 높은 위성 순위 (막대그래프)")
+    top_n = st.slider("몇 개까지 볼까요?", min_value=3, max_value=min(20, len(df)), value=min(10, len(df)))
+    top_df = df.nlargest(top_n, "고도(km)").sort_values("고도(km)")
+    rank_fig = px.bar(
+        top_df,
+        x="고도(km)",
+        y="위성명(정리)",
+        orientation="h",
+        color="궤도 유형",
+        hover_data={"위성번호": True, "궤도주기(분)": ":.1f", "고도(km)": ":,.0f"},
+    )
+    rank_fig.update_yaxes(title="위성명", type="category")
+    st.plotly_chart(rank_fig, use_container_width=True)
+    st.caption("평균 회전값으로 계산한 고도(원 궤도 가정)가 높은 순서입니다. 막대가 길수록 지구에서 먼 위성입니다.")
+
 # ---------------------------------------------------------------- 자동 저장
 current = {
     "meanings": {
