@@ -70,11 +70,19 @@ def save_record(meanings, source):
 
 # ---------------------------------------------------------------- 데이터 불러오기와 계산
 def find_csv():
-    """위성궤도정보.csv를 찾습니다. 없으면 같은 폴더의 다른 csv를 씁니다."""
+    """위성궤도정보.csv를 찾습니다. 같은 폴더 → 하위 폴더 → 실행 위치 순서로 찾고,
+    이름이 달라도 csv 파일이면 사용합니다."""
     if CSV_PATH.exists():
         return CSV_PATH
-    others = sorted(BASE_DIR.glob("*.csv"))
-    return others[0] if others else None
+    for folder in (BASE_DIR, Path.cwd()):
+        found = sorted(folder.glob("*.csv"))
+        if found:
+            return found[0]
+    for folder in (BASE_DIR, Path.cwd()):
+        found = sorted(p for p in folder.rglob("*.csv") if "내_기록" not in p.parts)
+        if found:
+            return found[0]
+    return None
 
 
 @st.cache_data(show_spinner="데이터를 불러오는 중입니다...")
@@ -136,6 +144,12 @@ def describe_values(series):
 csv_file = find_csv()
 if csv_file is None:
     st.error("위성궤도정보.csv 파일을 찾지 못했습니다. main.py와 같은 폴더에 CSV 파일을 넣어 주세요.")
+    try:
+        listing = sorted(p.name for p in BASE_DIR.iterdir())
+    except OSError:
+        listing = []
+    st.write("앱이 찾아본 폴더:", f"`{BASE_DIR}`")
+    st.write("그 폴더 안의 파일:", listing if listing else "(확인하지 못했습니다)")
     st.stop()
 
 try:
