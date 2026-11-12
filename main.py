@@ -182,6 +182,7 @@ if "table_base" not in st.session_state:
 
 # ---------------------------------------------------------------- 제목
 st.title(f"{APP_ICON} {APP_TITLE}")
+st.markdown("<div style='font-size:2rem; letter-spacing:0.4rem;'>🚀 🌍 🛰️ 🌙 ⭐ 🪐 ☄️ 👨‍🚀</div>", unsafe_allow_html=True)
 st.write(
     "이 데이터는 과학기술정보통신부 중앙전파관리소가 공개한 **인공위성 목록**입니다. "
     "위성의 이름, 번호, 그리고 궤도를 도는 정도를 나타내는 **평균 회전값**이 들어 있습니다."
@@ -193,10 +194,10 @@ tab_intro, tab_search, tab_chart = st.tabs(["📖 데이터 소개", "🔎 위�
 with tab_intro:
     rev = pd.to_numeric(raw_df["평균 회전값"], errors="coerce")
     cards = [
-        ("전체 위성 수", f"{len(raw_df):,}개"),
-        ("열 개수", f"{raw_df.shape[1]}개"),
-        ("빈 값 총 개수", f"{int(raw_df.isna().sum().sum()):,}개"),
-        ("평균 회전값 범위", f"{rev.min():.2f} ~ {rev.max():.2f}"),
+        ("🛰️ 전체 위성 수", f"{len(raw_df):,}개"),
+        ("📋 열 개수", f"{raw_df.shape[1]}개"),
+        ("🕳️ 빈 값 총 개수", f"{int(raw_df.isna().sum().sum()):,}개"),
+        ("🌀 평균 회전값 범위", f"{rev.min():.2f} ~ {rev.max():.2f}"),
     ]
     for column, (label, value) in zip(st.columns(4), cards):
         column.markdown(
@@ -205,7 +206,7 @@ with tab_intro:
             unsafe_allow_html=True,
         )
 
-    st.subheader("열 설명 표")
+    st.subheader("📝 열 설명 표")
     st.caption("'우리말 뜻' 칸을 더블클릭해서 직접 적어 보세요. 적은 내용은 자동으로 저장됩니다.")
     edited = st.data_editor(
         st.session_state["table_base"],
@@ -218,7 +219,7 @@ with tab_intro:
         key="meaning_editor",
     )
 
-    st.subheader("데이터 처음 다섯 줄")
+    st.subheader("👀 데이터 처음 다섯 줄")
     st.dataframe(
         raw_df.head(5),
         hide_index=True,
@@ -229,7 +230,7 @@ with tab_intro:
         "아래 '위성 찾기'와 '그래프'에서는 이 부분을 지우고 보여 줍니다."
     )
 
-    st.subheader("데이터 출처")
+    st.subheader("🔗 데이터 출처")
     st.text_area(
         "데이터 출처",
         key="source_text",
@@ -241,7 +242,7 @@ with tab_intro:
 
 # ================================================================ 탭 2: 위성 찾기
 with tab_search:
-    st.subheader("위성명으로 찾기")
+    st.subheader("🔭 위성명으로 찾기")
     query = st.text_input("위성명 또는 위성번호", placeholder="예: 3CAT, AAC, 43467").strip()
 
     shown = df
@@ -273,7 +274,7 @@ with tab_search:
 
 # ================================================================ 탭 3: 그래프
 with tab_chart:
-    st.subheader("위성번호 순서로 본 평균 회전값 (선그래프)")
+    st.subheader("📈 위성번호 순서로 본 평균 회전값 (선그래프)")
     by_number = df.sort_values("위성번호")
     line_fig = px.line(
         by_number,
@@ -286,7 +287,7 @@ with tab_chart:
     st.plotly_chart(line_fig, use_container_width=True)
     st.caption("점 하나가 위성 하나입니다. 위성 사이의 선은 비교를 돕기 위한 것이며, 시간에 따른 변화는 아닙니다.")
 
-    st.subheader("평균 회전값과 고도의 관계 (산점도)")
+    st.subheader("🌌 평균 회전값과 고도의 관계 (산점도)")
     log_scale = st.checkbox("고도를 로그 눈금으로 보기 (값 차이가 클 때 편해요)", value=True)
     scatter_fig = px.scatter(
         df,
@@ -300,7 +301,7 @@ with tab_chart:
     st.plotly_chart(scatter_fig, use_container_width=True)
     st.caption("많이 도는 위성일수록 낮은 곳에 있습니다. 두 값이 같은 계산식으로 이어져 있어 점들이 하나의 곡선 위에 놓입니다.")
 
-    st.subheader("고도가 높은 위성 순위 (막대그래프)")
+    st.subheader("🏆 고도가 높은 위성 순위 (막대그래프)")
     top_n = st.slider("몇 개까지 볼까요?", min_value=3, max_value=min(20, len(df)), value=min(10, len(df)))
     top_df = df.nlargest(top_n, "고도(km)").sort_values("고도(km)")
     rank_fig = px.bar(
