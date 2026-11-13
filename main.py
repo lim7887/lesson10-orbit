@@ -316,6 +316,36 @@ with tab_chart:
     st.plotly_chart(rank_fig, use_container_width=True)
     st.caption("평균 회전값으로 계산한 고도(원 궤도 가정)가 높은 순서입니다. 막대가 길수록 지구에서 먼 위성입니다.")
 
+    st.subheader("🪐 케플러 제3법칙 확인 (주기² ÷ 궤도 반지름³)")
+    kepler = df.copy()
+    kepler["궤도 반지름(km)"] = kepler["고도(km)"] + EARTH_RADIUS
+    kepler["a³ (km³)"] = kepler["궤도 반지름(km)"] ** 3
+    kepler["T² (s²)"] = (kepler["궤도주기(분)"] * 60) ** 2
+    k_const = 4 * math.pi**2 / MU  # 이론상 기울기 (s²/km³)
+    kepler["T²/a³"] = kepler["T² (s²)"] / kepler["a³ (km³)"]
+    kepler_fig = px.scatter(
+        kepler,
+        x="a³ (km³)",
+        y="T² (s²)",
+        color="궤도 유형",
+        hover_name="위성명(정리)",
+        hover_data={"궤도주기(분)": ":.1f", "고도(km)": ":,.0f"},
+    )
+    x_max = float(kepler["a³ (km³)"].max())
+    theory_df = pd.DataFrame({"a³ (km³)": [0, x_max], "T² (s²)": [0, k_const * x_max]})
+    theory_fig = px.line(theory_df, x="a³ (km³)", y="T² (s²)")
+    theory_fig.update_traces(name="이론선 (T² = 4π²/μ × a³)", showlegend=True, line={"dash": "dash"})
+    kepler_fig.add_traces(theory_fig.data)
+    st.plotly_chart(kepler_fig, use_container_width=True)
+    st.caption(
+        f"모든 위성이 한 직선 위에 놓이면 케플러 제3법칙(주기²는 궤도 반지름³에 비례)이 맞는 것입니다. "
+        f"계산한 T²/a³의 평균은 {kepler['T²/a³'].mean():.3e}, 이론값 4π²/μ는 {k_const:.3e}입니다."
+    )
+    st.caption(
+        "참고: 이 앱의 고도는 평균 회전값에서 케플러 법칙으로 계산한 값이라, 이 그래프는 계산이 일관된지 확인하는 용도입니다. "
+        "위성을 따로 관측해서 법칙을 검증한 것은 아닙니다."
+    )
+
 # ---------------------------------------------------------------- 자동 저장
 current = {
     "meanings": {
